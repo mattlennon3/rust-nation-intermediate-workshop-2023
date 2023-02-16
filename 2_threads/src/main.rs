@@ -1,15 +1,41 @@
+use std::sync::Arc;
+use std::sync::mpsc::channel;
 use std::thread;
+use std::thread::JoinHandle;
 use std::time::Duration;
 
-struct ThreadPool {}
+type ThreadPoolHandle = JoinHandle<Box<dyn FnOnce()>>;
+
+struct ThreadPool {
+    handles: Vec<ThreadPoolHandle>,
+    handler: Arc<>,
+}
 
 impl ThreadPool {
-    fn new(number_of_threads: u8) -> Self {
-        todo!()
+    // handles: Vec<N>;
+
+    fn new(number_of_threads: usize) -> Self {
+        let (sender, receiver) = channel::<ThreadPoolHandle>();
+        let receiver = Arc::new(receiver);
+        for n in number_of_threads {
+            let waiting_thread = thread::spawn();
+        }
+        ThreadPool {
+            handles: Vec::with_capacity(number_of_threads),
+        }
     }
 
-    fn execute(&self, task: ?) {
-        todo!()
+    fn execute<T>(&self, task: T)
+    where
+        T: FnOnce() + Send + 'static
+     {
+        let box_task = Box::new(task);
+        let boxed_handle = thread::spawn(box_task);
+        // iterate through threads
+        // let boxed_handle = thread::spawn(task);
+        // let handle = ;
+        // sender
+        self.handles.push(boxed_handle);
     }
 }
 
